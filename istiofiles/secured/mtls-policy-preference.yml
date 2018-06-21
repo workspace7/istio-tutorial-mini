@@ -1,0 +1,9 @@
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "Policy"
+metadata:
+  name: "secured-preference"
+spec:
+  targets:
+  - name: preference
+  peers:
+  - mtls:

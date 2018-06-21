@@ -3,7 +3,11 @@ package com.redhat.developer.demos.customer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,19 +44,18 @@ public class CustomerController {
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add(HttpHeaders.USER_AGENT, userAgent);
-            ResponseEntity<String> responseEntity =
-                restTemplate.exchange(remoteURL, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(remoteURL, HttpMethod.GET,
+                    new HttpEntity<>(httpHeaders), String.class);
             String response = responseEntity.getBody();
             return ResponseEntity.ok(String.format(RESPONSE_STRING_FORMAT, response.trim()));
         } catch (HttpStatusCodeException ex) {
             logger.warn("Exception trying to get the response from preference service.", ex);
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(String.format(RESPONSE_STRING_FORMAT,
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(String.format(RESPONSE_STRING_FORMAT,
                     String.format("%d %s", ex.getRawStatusCode(), createHttpErrorResponseString(ex))));
         } catch (RestClientException ex) {
             logger.warn("Exception trying to get the response from preference service.", ex);
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(String.format(RESPONSE_STRING_FORMAT, ex.getMessage()));
+                    .body(String.format(RESPONSE_STRING_FORMAT, ex.getMessage()));
         }
     }
 

@@ -1,0 +1,9 @@
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "DestinationRule"
+metadata:
+  name: "secured-preference"
+spec:
+  host: "preference.two.svc.cluster.local" # does this need to be fully secured or it can be just service name
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
