@@ -6,11 +6,15 @@ spec:
   destination:
     namespace: tutorial
     name: recommendation
-  precedence: 5
+  precedence: 1
   route:
   - labels:
       version: v1
-    weight: 90
+    weight: 50
   - labels:
       version: v2
-    weight: 10
+    weight: 50
+  httpReqRetries:
+    simpleRetry:
+      perTryTimeout: 1s
+      attempts: 3

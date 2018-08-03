@@ -104,13 +104,13 @@ NOTE: In this tutorial, you will often be polling the customer endpoint with `cu
 #!/bin/bash
 
 # Mac OS:
-curl -L https://github.com/istio/istio/releases/download/0.6.0/istio-0.6.0-osx.tar.gz | tar xz
+curl -L https://github.com/istio/istio/releases/download/1.0.0/istio-1.0.0-osx.tar.gz | tar xz
 
 # Fedora:
-curl -L https://github.com/istio/istio/releases/download/0.6.0/istio-0.6.0-linux.tar.gz | tar xz
+curl -L https://github.com/istio/istio/releases/download/1.0.0/istio-1.0.0-linux.tar.gz | tar xz
 
 # Both:
-cd istio-0.6.0
+cd istio-1.0.0
 export ISTIO_HOME=`pwd`
 export PATH=$ISTIO_HOME/bin:$PATH
 ----
@@ -125,9 +125,11 @@ istioctl version
 The above command should show output like:
 
 ```
-Version: 0.6.0GitRevision: 2cb09cdf040a8573330a127947b11e5082619895
-User: root@a28f609ab931Hub: docker.io/istio
-GolangVersion: go1.9
+Version: 1.0.0
+GitRevision: 3a136c90ec5e308f236e0d7ebb5c4c5e405217f4
+User: root@71a9470ea93c
+Hub: gcr.io/istio-release
+GolangVersion: go1.10.1
 BuildStatus: Clean
 ```
 
@@ -136,9 +138,17 @@ BuildStatus: Clean
 oc login $(minishift ip):8443 -u admin -p admin
 oc adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
 oc adm policy add-scc-to-user anyuid -z default -n istio-system
-oc adm policy add-scc-to-user anyuid -z grafana -n istio-system
 oc adm policy add-scc-to-user anyuid -z prometheus -n istio-system
-oc create -f install/kubernetes/istio.yaml
+oc adm policy add-scc-to-user anyuid -z istio-egressgateway-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-citadel-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-ingressgateway-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-cleanup-old-ca-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-mixer-post-install-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-mixer-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-pilot-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-sidecar-injector-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-galley-service-account -n istio-system
+oc create -f install/kubernetes/istio-demo.yaml
 oc project istio-system
 oc expose svc istio-ingress
 oc apply -f install/kubernetes/addons/prometheus.yaml
@@ -147,23 +157,30 @@ oc apply -f install/kubernetes/addons/servicegraph.yaml
 oc expose svc servicegraph
 oc expose svc grafana
 oc expose svc prometheus
-oc process -f https://raw.githubusercontent.com/jaegertracing/jaeger-openshift/master/all-in-one/jaeger-all-in-one-template.yml | oc create -f -
+oc expose svc jaeger-query
 ----
 
 Wait for Istio's components to be ready
 
 [source,bash]
 ----
-$ oc get pods -w
-NAME                             READY     STATUS    RESTARTS   AGE
-grafana-3617079618-4qs2b         1/1       Running   0          4m
-istio-ca-1363003450-tfnjp        1/1       Running   0          4m
-istio-ingress-1005666339-vrjln   1/1       Running   0          4m
-istio-mixer-465004155-zn78n      3/3       Running   0          5m
-istio-pilot-1861292947-25hnm     2/2       Running   0          4m
-jaeger-210917857-2w24f           1/1       Running   0          4m
-prometheus-168775884-dr5dm       1/1       Running   0          4m
-servicegraph-1100735962-tdh78    1/1       Running   0          4m
+$ oc get pods -w -n istio-system
+NAME                                        READY     STATUS      RESTARTS   AGE
+grafana-6995b4fbd7-2m2sc                    1/1       Running     0          1h
+istio-citadel-54f4678f86-dd75x              1/1       Running     0          1h
+istio-cleanup-secrets-57nmm                 0/1       Completed   0          1h
+istio-egressgateway-5d7f8fcc7b-8x2bz        1/1       Running     0          1h
+istio-galley-7bd8b5f88f-8vwgv               1/1       Running     0          1h
+istio-grafana-post-install-v4s4j            0/1       Completed   0          1h
+istio-ingressgateway-6f58fdc8d7-br4gw       1/1       Running     0          1h
+istio-pilot-d99689994-r275d                 2/2       Running     0          1h
+istio-policy-766bf4bd6d-wksl8               2/2       Running     0          1h
+istio-sidecar-injector-85ccf84984-kxdhb     1/1       Running     0          1h
+istio-statsd-prom-bridge-55965ff9c8-8s5j5   1/1       Running     0          1h
+istio-telemetry-55b6b5bbc7-vcv9b            2/2       Running     0          1h
+istio-tracing-77f9f94b98-th89f              1/1       Running     0          1h
+prometheus-7456f56c96-6m6h7                 1/1       Running     0          1h
+servicegraph-684c85ffb9-pxdrl               1/1       Running     0          1h
 ----
 
 And if you need quick access to the OpenShift console
@@ -231,6 +248,7 @@ Now let's deploy the customer pod:
 ----
 oc apply -f ./kubernetes/Deployment.yml -n tutorial
 oc create -f ./kubernetes/Service.yml -n tutorial
+oc create -f ./kubernetes/gateway.yml -n tutorial
 ----
 
 Since the `customer` service is the one our users will interact with, let's add an OpenShift Route that exposes that endpoint.
@@ -412,7 +430,7 @@ Based on the Deployment configuration, Kubernetes/OpenShift will recreate the po
 oc describe deployment {servicename} | grep Replicas
 ----
 
-== Adding RouteRules
+== Adding Virtual Services
 
 === recommendation:v2
 
@@ -537,6 +555,11 @@ cd ..
 
 With Istio side cars deployed to the applications, its possible to alter routing rules to services.
 
+==== Create Destination Rules for Recommendation
+[source,bash]
+----
+$ istioctl create -f istiofiles/destination-rule-recommendation.yml -n tutorial
+----
 
 ==== All users to recommendation:v2
 
@@ -544,7 +567,7 @@ From the main kubeboot directory,
 
 [source,bash]
 ----
-istioctl create -f istiofiles/route-rule-recommendation-v2.yml -n tutorial
+istioctl create -f istiofiles/virtual-service-recommendation-v2.yml -n tutorial
 
 curl customer-tutorial.$(minishift ip).nip.io
 ----
@@ -557,11 +580,11 @@ Note: "replace" instead of "create" since we are overlaying the previous rule
 
 [source,bash]
 ----
-istioctl replace -f istiofiles/route-rule-recommendation-v1.yml -n tutorial
+istioctl replace -f istiofiles/virtual-service-recommendation-v1.yml -n tutorial
 
-istioctl get routerules -n tutorial
+istioctl get virtualservices -n tutorial
 
-istioctl get routerule recommendation-default -o yaml -n tutorial
+istioctl get virtualservices recommendation-default -o yaml -n tutorial
 ----
 
 ==== All users to recommendation v1 and v2
@@ -570,7 +593,8 @@ By simply removing the rule
 
 [source,bash]
 ----
-istioctl delete routerule recommendation-default -n tutorial
+istioctl delete virtualservice recommendation -n tutorial
+istioctl create -f istiofiles/virtual-service-recommendation-v1_and_v2.yml -n tutorial
 ----
 
 and you should see the default behavior of load-balancing between v1 and v2
@@ -621,7 +645,7 @@ Clean up
 
 [source,bash]
 ----
-istioctl delete routerule recommendation-v1-v2 -n tutorial
+istioctl delete virtualservice recommendation-v1-v2 -n tutorial
 ----
 
 == More fun !
@@ -638,16 +662,16 @@ Note: the "user-agent" header being forwarded in the Customer and Preferences co
 
 [source,bash]
 ----
-istioctl create -f istiofiles/route-rule-recommendation-v1.yml -n tutorial
+istioctl create -f istiofiles/virtual-service-recommendation-v1.yml -n tutorial
 ----
 
 ==== Set Safari users to v2
 
 [source,bash]
 ----
-istioctl create -f istiofiles/route-rule-safari-recommendation-v2.yml -n tutorial
+istioctl create -f istiofiles/virtual-service-safari-recommendation-v2.yml -n tutorial
 
-istioctl get routerules -n tutorial
+istioctl get virtualservices -n tutorial
 ----
 
 and test with a Safari (or even Chrome on Mac since it includes Safari in the string). Safari only sees v2 responses from recommendation
@@ -681,17 +705,16 @@ curl -A Safari customer-tutorial.$(minishift ip).nip.io
 curl -A Firefox customer-tutorial.$(minishift ip).nip.io
 ----
 
-You can describe the routerule to see its configuration
+You can describe the virtualservice to see its configuration
 
 [source,bash]
 ----
-istioctl get routerule recommendation-safari -o yaml -n tutorial
+istioctl get virtualservice recommendation -o yaml -n tutorial
 ----
 
 Clean up
 
 [source,bash]
 ----
-istioctl delete routerule recommendation-safari -n tutorial
-istioctl delete routerule recommendation-default -n tutorial
+istioctl delete virtualservice recommendation -n tutorial
 ----
