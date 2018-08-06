@@ -39,6 +39,8 @@ customer → preference → recommendation
 
 For now, they have a simple exception handling solution for dealing with a missing dependent service: it just returns the error message to the end-user.
 
+https://slidr.io/kameshsampath/kubeboot-spring-boot-deployment-on-kubernetes-has-never-been-so-easy[Download Slides]
+
 == Prerequisite CLI tools
 
 You will need in this tutorial:
