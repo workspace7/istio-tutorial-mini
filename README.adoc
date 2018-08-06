@@ -669,7 +669,7 @@ istioctl create -f istiofiles/virtual-service-recommendation-v1.yml -n tutorial
 
 [source,bash]
 ----
-istioctl create -f istiofiles/virtual-service-safari-recommendation-v2.yml -n tutorial
+istioctl replace -f istiofiles/virtual-service-safari-recommendation-v2.yml -n tutorial
 
 istioctl get virtualservices -n tutorial
 ----

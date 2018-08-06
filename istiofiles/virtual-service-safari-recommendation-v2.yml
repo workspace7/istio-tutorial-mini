@@ -8,8 +8,8 @@ spec:
   http:
   - match:
     - headers:
-        BAGGAGE-USER-AGENT:
-          regex: .*Safarizz.* 
+        baggage-user-agent:
+          regex: .*Safari.* 
     route:
     - destination:
         host: recommendation
