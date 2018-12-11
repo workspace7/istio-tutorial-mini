@@ -32,6 +32,11 @@ public class CustomerController {
         this.restTemplate = restTemplate;
     }
 
+    @RequestMapping("/whereami")
+    public String whereami() {
+        return String.format(RESPONSE_STRING_FORMAT, System.getenv().getOrDefault("HOSTNAME", "unknown"));
+    }
+
     @RequestMapping("/")
     public ResponseEntity<String> getCustomer(@RequestHeader("User-Agent") String userAgent) {
         try {
@@ -45,9 +50,8 @@ public class CustomerController {
             return ResponseEntity.ok(String.format(RESPONSE_STRING_FORMAT, response.trim()));
         } catch (HttpStatusCodeException ex) {
             logger.warn("Exception trying to get the response from preference service.", ex);
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(String.format(RESPONSE_STRING_FORMAT,
-                            String.format("%d %s", ex.getRawStatusCode(), createHttpErrorResponseString(ex))));
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(String.format(RESPONSE_STRING_FORMAT,
+                    String.format("%d %s", ex.getRawStatusCode(), createHttpErrorResponseString(ex))));
         } catch (RestClientException ex) {
             logger.warn("Exception trying to get the response from preference service.", ex);
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
