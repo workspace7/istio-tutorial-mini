@@ -22,6 +22,8 @@ spec:
         # disables pushing of the $DESTINATION_NAME to container registry
         - name: PUSH
           value: "false"
+        - name: MAVEN_MIRROR_URL
+          value: "http://192.168.64.1:8081/nexus/content/groups/public"
       image: quay.io/rhdevelopers/quarkus-java-builder
       name: build-and-push
       # needed for buildah builds to be running as containers
