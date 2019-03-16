@@ -1,0 +1,44 @@
+apiVersion: build.knative.dev/v1alpha1
+kind: Build
+metadata:
+  name: istio-tutorial-recommendation-build
+  labels:
+    app: istio-tutorial-preference
+    type: build
+spec:
+  serviceAccountName: build-bot
+  source:
+    git:
+      revision: "--gitRev--"
+      url: "https://github.com/redhat-developer-demos/istio-tutorial.git"
+  steps:
+    - args:
+        - "/usr/local/bin/maven-buildah.sh"
+      env:
+        - name: WORK_DIR
+          value: /workspace/recommendation/java/springboot
+        - name: DESTINATION_NAME
+          value: dev.local/rhdevelopers/recommendation:--imgTag--
+        # disables pushing of the $DESTINATION_NAME to container registry
+        - name: PUSH
+          value: "false"
+      image: quay.io/rhdevelopers/quarkus-java-builder
+      name: build-and-push
+      # needed for buildah builds to be running as containers
+      securityContext:
+        capabilities:
+          add: ["SYS_ADMIN"]
+      volumeMounts:
+        - mountPath: /root/.m2
+          name: m2-cache
+        - mountPath: /var/lib/containers
+          name: container-storage
+      workingDir: /workspace/recommendation/java/springboot
+  timeout: 60m
+  volumes:
+    - name: m2-cache
+      persistentVolumeClaim:
+        claimName: m2-cache
+    - name: container-storage
+      hostPath:
+        path: /var/lib/containers

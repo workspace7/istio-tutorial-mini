@@ -1,0 +1,10 @@
+---
+- hosts: minikube
+  become: True
+  vars:
+    docker_enabled: False
+  tasks:
+    - name: copy sources from local to remote
+
+    - name: list images
+      command: podman images
