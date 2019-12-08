@@ -24,7 +24,7 @@ minikube start -p ${PROFILE_NAME} \
   --bootstrapper=kubeadm \
   --extra-config=apiserver.enable-admission-plugins="LimitRanger,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook"
 
-kubectl create ns  tutorial
+kubectl create ns tutorial
 
 kubectl label namespaces tutorial istio-injection=enabled
 

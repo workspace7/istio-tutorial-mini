@@ -1,8 +1,3 @@
-#!/bin/bash 
-
-set -e
-
-export ISTIO_HOME=`pwd`/istio-1.0.5
-export PATH=$ISTIO_HOME/bin:$PATH
+export MASTER_URL='"https://api.cluster-cgk-d8e7.cgk-d8e7.open.redhat.com:6443'
 
 export TUTORIAL_HOME='/Users/kameshs/git/redhat-developer-demos/istio-tutorial'
