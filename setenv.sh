@@ -1,3 +1,5 @@
-export MASTER_URL='"https://api.cluster-cgk-d8e7.cgk-d8e7.open.redhat.com:6443'
+set -eu 
 
-export TUTORIAL_HOME='/Users/kameshs/git/redhat-developer-demos/istio-tutorial'
+source ~/bin/ocp4env $CLOUD_PROFILE
+
+TUTORIAL_HOME=${TUTORIAL_HOME:-'/Users/kameshs/git/redhat-developer-demos/istio-tutorial'}

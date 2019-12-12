@@ -2,7 +2,7 @@
 
 set -e
 
-TUTORIAL_HOME='/Users/kameshs/git/redhat-developer-demos/istio-tutorial'
+TUTORIAL_HOME=${TUTORIAL_HOME:-'/Users/kameshs/git/redhat-developer-demos/istio-tutorial'}
 
 # TODO copy the files to remote 
 
@@ -16,11 +16,13 @@ then
 # ! kubectl delete  -n tutorial -f  "customer-build.yaml"
  ! kubectl delete  -n tutorial  -f  "$TUTORIAL_HOME/customer/kubernetes/Deployment.yml"
  ! kubectl delete  -n tutorial -f "$TUTORIAL_HOME/customer/kubernetes/Service.yml"
+ ! kubectl delete  -n tutorial -f "$TUTORIAL_HOME/customer/kubernetes/Gateway.yml"
  exit 0
 fi
 
 # kubectl create   -n tutorial -f  "customer-build.yaml"
 kubectl create -n tutorial  -f  "$TUTORIAL_HOME/customer/kubernetes/Deployment.yml"
 kubectl create -n tutorial  -f "$TUTORIAL_HOME/customer/kubernetes/Service.yml"
+kubectl create  -n tutorial -f "$TUTORIAL_HOME/customer/kubernetes/Gateway.yml"
 # Set service to be node port
 #kubectl -n tutorial get svc customer -o yaml | yq w - spec.type NodePort | kubectl apply -f -

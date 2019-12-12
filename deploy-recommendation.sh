@@ -3,7 +3,7 @@
 
 set -e
 
-TUTORIAL_HOME='/Users/kameshs/git/redhat-developer-demos/istio-tutorial'
+TUTORIAL_HOME=${TUTORIAL_HOME:-'/Users/kameshs/git/redhat-developer-demos/istio-tutorial'}
 
 _clean="no"
 
